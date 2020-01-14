@@ -1,0 +1,28 @@
+{
+  "name": "capstone",
+  "version": "1.0.0",
+  "description": "A motivational app",
+  "main": "database.js",
+  "dependencies": {
+    "chrome": "^0.1.0",
+    "firebase": "^7.6.1",
+    "firebaseauth": "^1.0.0",
+    "firebaseui": "^4.4.0",
+    "mongodb": "^3.4.1",
+    "mysql": "^2.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m00n7799/Capstone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m00n7799/Capstone/issues"
+  },
+  "homepage": "https://github.com/m00n7799/Capstone#readme"
+}

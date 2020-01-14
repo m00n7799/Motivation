@@ -1,0 +1,27 @@
+{
+  "name": "Motivation",
+  "version": "1.0",
+  "description": "A Motivational app for students that would do anything but turn in late homework.",
+  "permissions": [
+      "storage",
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "https://*.youtube.com/*",
+    "https://www.twitch.tv/*",
+    "https://www.netflix.com/*",
+    "https://www.hulu.com/*",
+    "https://www.disneyplus.com/*"
+  ],
+  "options_page": "",
+  "browser_action":{
+    "default_popup":"config.html"
+  },
+  "background": {
+    "persistent": true,
+    "scripts": ["firebase-app.js","firebase-database.js","webRedirect.js"]
+  },
+  "content_security_policy": "script-src 'self' https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js https://www.gstatic.com/firebasejs/ui/4.3.0/firebase-ui-auth.js https://www.gstatic.com/firebasejs/6.2.4/firebase-auth.js; object-src 'self'",
+  "manifest_version": 2
+}
