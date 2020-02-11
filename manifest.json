@@ -8,13 +8,13 @@
     "tabs",
     "webRequest",
     "webRequestBlocking",
-    "https://*.youtube.com/*",
-    "https://www.twitch.tv/*",
-    "https://www.netflix.com/*",
+    "https://www.disneyplus.com/*",
     "https://www.hulu.com/*",
-    "https://www.disneyplus.com/*"
+    "https://www.netflix.com/*",
+    "https://www.twitch.tv/*",
+    "https://www.youtube.com/*"
   ],
-  "options_page": "",
+  "options_page": "options.html",
   "browser_action":{
     "default_popup":"config.html"
   },

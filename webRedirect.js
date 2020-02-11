@@ -17,6 +17,7 @@ console.log(app.options.databaseURL);
 let USER_SIGNED_IN = "";
 
 //#region LogIn
+let students;
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   for (var key in changes) {
     var storageChange = changes[key];
@@ -31,74 +32,110 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     //   login.addEventListener("click", e => {
     //   });
   }
-  getUserSign(changes);
+  if (namespace == "sync") {
+    getUserSign(changes);
+  }
+  if (namespace == "local") {
+    console.log(students);
+
+    gradeChange(changes);
+  }
 });
+function gradeChange(changes) {
+    console.log(changes["studnetSelection"].newValue);
+    students = changes["studnetSelection"].newValue;
+
+  let gradToChange = changes["studentGradeSelection"].newValue;
+  let letterGrade = changes["studnetNewLetter"].newValue;
+  let helpME = `/Users/${students}/Grades/${gradToChange}`;
+  firebase
+    .database()
+    .ref()
+    .child(helpME)
+    .set(letterGrade);
+}
 function getUserSign(changes) {
   // console.log(changes)
-  var storageChange = changes['email'];
-
-    USER_SIGNED_IN = storageChange.newValue;
-    // console.log(storageChange.newValue);
-  
+  var storageChange = changes["email"];
+  USER_SIGNED_IN = storageChange.newValue;
+  // console.log(storageChange.newValue);
+  localStorage.setItem("User", `<h1>Hello ${USER_SIGNED_IN}</h1>`);
   let pass;
   chrome.storage.sync.get(["password"], function(result) {
     pass = result.key;
   });
-  let ref1 = db.ref("Students");
+  let ref1 = db.ref("Users");
   ref1.on("value", gotData, err);
-  // let ref2 = db.ref("websites");
-  // ref2.on("value", gotData2, err);
+  let ref2 = db.ref("websites");
+  ref2.on("value", gotData2, err);
 }
-
-// const promise = firebase.auth().signInWithEmailAndPassword(emailVal, pass);
-// promise.catch(e => console.log(e.message));
-
 //#endregion
+// firebase.database().ref().child('/Users/1/Grades').update({ '3': "A"});
 
 //#region Writing and reading data
-function writeUserData(userId, name, email) {
-  db.ref("users/" + userId).set({
-    username: name,
-    email: email
-  });
-  // let userId= firebase.auth().currentUser.uid;
-  return firebase
-    .database()
-    .ref("/users/" + userId)
-    .once("value")
-    .then(function(snapshot) {
-      var username = (snapshot.val() && snapshot.val().username) || "Anonymus";
-    });
-}
-// let ref1 = db.ref("Students");
-// ref1.on("value", gotData, err);
-// let ref2 = db.ref("websites");
-// ref2.on("value", gotData2, err);
 let names;
 let grades;
+let role;
 let overAll = [];
+let UserInfo;
+
 function gotData(data) {
+  let userGrad = "";
   let info = data.val();
   let keysOfInfo = Object.keys(info);
-  console.log(keysOfInfo);
+
   for (let x = 0; x < keysOfInfo.length; x++) {
     let k = keysOfInfo[x];
     names = info[k].Name;
     grades = info[k].Grades;
-    console.log(USER_SIGNED_IN);
+    role = info[k].Role;
     // console.log(names, grades);
-    if (names == USER_SIGNED_IN) {
-      for (let y = 0; y < grades.length; y++) {
-        if (grades[y] == "F") {
-          overAll.push(grades);
+    if (role == "Student") {
+      if (names == USER_SIGNED_IN) {
+        for (let y = 0; y < grades.length; y++) {
+          if (grades[y] == "F") {
+            overAll.push(grades);
+          } else {
+            overAll.pop();
+          }
+          userGrad += `<li style='display:block;'> ${y}: ${grades[y]}</li>`;
         }
-        else{
-          overAll.pop();
+        localStorage.setItem("Role", role);
+        UserInfo = `Here are your grades right now: ${userGrad}`;
+      }
+    }
+    if (role == "Teacher") {
+      let studen = "";
+      let maybeThis = [];
+      let thisTo = [];
+      if (names == USER_SIGNED_IN) {
+        for (let i = 0; i < keysOfInfo.length; i++) {
+          let k2 = keysOfInfo[i];
+          names2 = info[k2].Name;
+          grades2 = info[k2].Grades;
+          role2 = info[k2].Role;
+
+          if (role2 == "Student") {
+            for (let grad = 0; grad < grades2.length; grad++) {
+              console.log(names2, grades2);
+              // userGrad += `${grades2[grad]}`;
+              thisTo.push(grades2[grad]);
+            }
+            thisTo.push(",");
+
+            maybeThis.push(names2);
+            userGrad = "";
+          }
         }
+        localStorage.setItem("Role", role);
+        localStorage.setItem("Names", maybeThis);
+
+        UserInfo = thisTo;
       }
     }
   }
-  console.log("overAll: " + overAll);
+
+  localStorage.setItem("UserInfo", UserInfo);
 }
 let websites = [];
 function gotData2(data) {
@@ -110,8 +147,7 @@ function gotData2(data) {
     names = info[k].WebsiteName;
     Links = info[k].Link;
 
-    console.log(names, grades);
-    websites.push(grades);
+    websites.push(Links);
   }
 }
 function err(error) {
@@ -122,13 +158,7 @@ function err(error) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    writeUserData(
-      "OpGPIRoAwoRRIOG1MJVUCMyY7ip1",
-      "Danny Eastwood",
-      "deastwood7799@gmail.com"
-    );
     for (let x = 0; x < overAll.length; x++) {
-      console.log(overAll[x]);
       for (let y = 0; y < overAll[x].length; y++) {
         if (overAll[x][y] == "F") {
           console.log("-hacker voice- I'm in");
@@ -140,13 +170,15 @@ chrome.webRequest.onBeforeRequest.addListener(
     }
   },
   {
-    urls: [
-      "https://*.youtube.com/*",
-      "https://www.twitch.tv/*",
-      "https://www.netflix.com/*",
-      "https://www.hulu.com/*",
-      "https://www.disneyplus.com/*"
-    ]
+    urls:
+      // websites
+      [
+        "https://*.youtube.com/*",
+        "https://www.twitch.tv/*",
+        "https://www.netflix.com/*",
+        "https://www.hulu.com/*",
+        "https://www.disneyplus.com/*"
+      ]
   },
   ["blocking"]
 );
