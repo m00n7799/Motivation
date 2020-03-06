@@ -10,7 +10,7 @@ const divForBTN = document.getElementById("buttonDiv");
       const emailVal = email.value;
       const pass = password.value;
       let Welcome = document.createElement("label");
-      Welcome.innerHTML = "Hello, " + emailVal;
+      Welcome.innerHTML = "Hello, " + emailVal + " if you'd like to check on your grades right click on the extension and click on the options page.";
       divForBTN.appendChild(Welcome);
       divForBTN.style.width = "200px";
       login.style.display = "none";

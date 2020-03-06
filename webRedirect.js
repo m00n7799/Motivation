@@ -36,16 +36,66 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     getUserSign(changes);
   }
   if (namespace == "local") {
-    console.log(students);
+    try {
+      let newString = `/Games/${changes['GameSelection'].newValue}/Enabled/`;
+      let isFalse;
+        try {
+          isFalse = changes['Enable'].newValue;
+          
+        } catch (error) {
+          isFalse='False';
+        }
+      firebase
+        .database()
+        .ref()
+        .child(newString)
+        .set(isFalse);
+      
+    } catch (error) {
+      let game;
+      let helperNum='0';
+      try {
+        game =changes["GameSelection"].newValue;
+        helperNum='1';
 
-    gradeChange(changes);
+      } catch (error) {
+        
+      } 
+      if (helperNum != '0') {
+
+        let newString = `/Games/${game}/Enabled/`;
+        let isFalse;
+        try {
+          isFalse = changes['Enable'].newValue;
+          
+        } catch (error) {
+          isFalse=changes['Enable'].oldValue;
+        }
+
+      firebase
+        .database()
+        .ref()
+        .child(newString)
+        .set(isFalse);
+      }else{
+        gradeChange(changes);
+      }
+    }
   }
 });
 function gradeChange(changes) {
-    console.log(changes["studnetSelection"].newValue);
+  try {
+    console.log(changes["studnetSelection"].currentValue);
     students = changes["studnetSelection"].newValue;
-
-  let gradToChange = changes["studentGradeSelection"].newValue;
+  } catch (error) {
+    students = "1";
+  }
+  let gradToChange;
+  try {
+    gradToChange = changes["studentGradeSelection"].newValue;
+  } catch (error) {
+    // gradToChange=changes['studentGradeSelection'].oldValue;
+  }
   let letterGrade = changes["studnetNewLetter"].newValue;
   let helpME = `/Users/${students}/Grades/${gradToChange}`;
   firebase
@@ -66,7 +116,7 @@ function getUserSign(changes) {
   });
   let ref1 = db.ref("Users");
   ref1.on("value", gotData, err);
-  let ref2 = db.ref("websites");
+  let ref2 = db.ref("Games");
   ref2.on("value", gotData2, err);
 }
 //#endregion
@@ -139,16 +189,18 @@ function gotData(data) {
 }
 let websites = [];
 function gotData2(data) {
+  let maybeThis = [];
+
   let info = data.val();
   let keysOfInfo = Object.keys(info);
-
   for (let x = 0; x < keysOfInfo.length; x++) {
     let k = keysOfInfo[x];
-    names = info[k].WebsiteName;
+    names = info[k].Name;
     Links = info[k].Link;
-
-    websites.push(Links);
+    enabled = info[k].Enabled;
+    maybeThis.push(names);
   }
+  localStorage.setItem("games", maybeThis);
 }
 function err(error) {
   console.log(error);

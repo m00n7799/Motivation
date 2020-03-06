@@ -1,11 +1,16 @@
 let divForUser = document.getElementById("user");
 let divForGrades = document.getElementById("grades");
+let body = document.getElementById('bodys');
 let btn = document.getElementById("btn");
-divForUser.style.width = "200px";
+let btn2 = document.createElement('button');
+btn2.id='games'
+body.appendChild(btn2);
+
 divForUser.innerHTML = localStorage.getItem("User");
 
 btn.style.display = "none";
-divForGrades.style.width = "200px";
+btn2.style.display = "none";
+
 let rol = localStorage.getItem("Role");
 
 if (rol == "Student") {
@@ -91,18 +96,28 @@ if (rol == "Teacher") {
     console.log(gradSelec);
 
     subBTN.innerHTML = "Change grades";
+    subBTN.id = 'GradeChange';
     divForGrades.appendChild(subBTN);
     btn.style.display = "none";
     subBTN.addEventListener("click", e => {
       console.log(selec, gradSelec);
       let gradeChange = document.createElement("input");
       gradeChange.placeholder = "What grade is it going to be now?";
-      gradeChange.style.width = "200px";
+      gradeChange.id='gradeInput'
 
       let sBTN = document.createElement("button");
       sBTN.innerHTML = "Submit grade change";
+      sBTN.id = 'submitBTN';
+  
+
+      let br = document.createElement('br');
+
+      let br2 = document.createElement('br');
+      divForGrades.appendChild(br);
 
       divForGrades.appendChild(gradeChange);
+      divForGrades.appendChild(br2);
+
       divForGrades.appendChild(sBTN);
 
 
@@ -112,7 +127,7 @@ if (rol == "Teacher") {
         gradeChange.style.display = 'none';
         subBTN.style.display = 'none';
         sBTN.innerHTML = 'Refresh the page to see the change.';
-        window.location.reload();
+        // window.location.reload();
         console.log(value1);
             chrome.storage.local.set(
                 { studnetSelection: selec, studentGradeSelection: gradSelec, studnetNewLetter:value1  },
@@ -121,6 +136,63 @@ if (rol == "Teacher") {
                 }
               );
       });
+    });
+  });
+  btn2.style.display = "block";
+  btn2.innerHTML = 'Games blocked';
+  btn2.addEventListener('click',e => {
+    let div = document.createElement('div');
+    body.appendChild(div);
+    
+    let games = localStorage.getItem('games');
+    let news  = games.split(',');
+    console.log(news)
+   let p = document.createElement('p');
+   let p2 = document.createElement('p');
+   div.id = 'gameDiv';
+   p2.innerHTML = "Below are the game/game platforms that are blocked with the application if you'd like to change one select it and click submit."
+   div.appendChild(p2);
+
+   div.appendChild(p);
+   let gamesSelec=[];
+   for (let x = 0; x < news.length; x++) {
+     gamesSelec.push(`<option value = ${x + 1}>${news[x]}</option>`);
+    }
+    
+    p.innerHTML = `<select id='whichGames'>${gamesSelec}<select>`;
+    let selection = document.getElementById("whichGames");
+    var selected = selection.options[selection.selectedIndex].value;
+    var selec = selected;
+    console.log(selected);
+    selection.addEventListener("change", e => {
+      selec = selection.options[selection.selectedIndex].value;
+      
+      console.log(selec);
+    });
+    let disableBTN = document.createElement('button');
+    disableBTN.id = 'disableBTN';
+    disableBTN.innerHTML='Disable this item';
+    let enableBTN = document.createElement('button');
+    enableBTN.id = 'enableBTN';
+    enableBTN.innerHTML='enable blocking of this item';
+    div.appendChild(disableBTN);
+    div.appendChild(enableBTN);
+
+    disableBTN.addEventListener('click', e =>{
+      chrome.storage.local.set(
+        {GameSelection:selec, Enable:'False'},
+        function() {
+          console.log("Saved");
+        }
+      );
+    });
+    enableBTN.addEventListener('click', e =>{
+      chrome.storage.local.set(
+        {GameSelection:selec, Enable:'True'},
+        function() {
+          console.log("Saved");
+        }
+      );
     });
   });
 }
